@@ -23,7 +23,7 @@ pipeline {
 
                 sh '/usr/local/bin/docker rm -f court-container || true'
 
-                sh '/usr/local/bin/docker run -d --name court-container -p 8080:80 court-app:v1'
+                sh '/usr/local/bin/docker run -d --name court-container -p 8081:80 court-app:v1'
             }
         }
 
