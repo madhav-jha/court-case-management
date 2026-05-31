@@ -1,0 +1,13 @@
+services:
+
+  frontend:
+    image: court-app:v1
+    container_name: frontend-container
+    ports:
+      - "8081:80"
+
+  backend:
+    build: ./backend
+    container_name: backend-container
+    ports:
+      - "5001:5001"
