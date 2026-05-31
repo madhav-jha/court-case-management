@@ -13,7 +13,7 @@ pipeline {
         stage('Docker_Image_Build') {
             steps {
                 echo 'Build Docker Image'
-                sh 'docker build -t court-app:v1 .'
+                sh '/usr/local/bin/docker build -t court-app:v1 .'
             }
         }
 
@@ -21,9 +21,9 @@ pipeline {
             steps {
                 echo 'Deploy Application Container'
 
-                sh 'docker rm -f court-container || true'
+                sh '/usr/local/bin/docker rm -f court-container || true'
 
-                sh 'docker run -d --name court-container -p 8080:80 court-app:v1'
+                sh '/usr/local/bin/docker run -d --name court-container -p 8080:80 court-app:v1'
             }
         }
 
