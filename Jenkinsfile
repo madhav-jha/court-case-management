@@ -30,7 +30,7 @@ pipeline {
         stage('Application_Verification') {
             steps {
                 echo 'Verify Running Container'
-                sh 'docker ps'
+                sh '/usr/local/bin/docker ps'
             }
         }
     }
