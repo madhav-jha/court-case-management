@@ -1,36 +1,67 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER = '/usr/local/bin/docker'
+        DOCKER_HUB_USER = 'jhamadhav2025'
+    }
+
     stages {
 
         stage('SCM_Checkout') {
             steps {
-                echo 'Perform SCM Checkout from GitHub Repository'
+                echo 'Checkout Source Code'
                 checkout scm
             }
         }
 
-        stage('Docker_Image_Build') {
+        stage('Build Docker Images') {
             steps {
-                echo 'Build Docker Image'
-                sh '/usr/local/bin/docker build -t court-app:v1 .'
+                echo 'Build Frontend Image'
+                sh '${DOCKER} build -t ${DOCKER_HUB_USER}/court-frontend:v1 ./frontend'
+
+                echo 'Build Backend Image'
+                sh '${DOCKER} build -t ${DOCKER_HUB_USER}/court-backend:v1 ./backend'
             }
         }
 
-        stage('Application_Deploy') {
+        stage('Docker Hub Login') {
             steps {
-                echo 'Deploy Application Container'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
 
-                sh '/usr/local/bin/docker rm -f court-container || true'
-
-                sh '/usr/local/bin/docker run -d --name court-container -p 8081:80 court-app:v1'
+                    sh '''
+                    echo $DOCKER_PASS | /usr/local/bin/docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
             }
         }
 
-        stage('Application_Verification') {
+        stage('Push Images To Docker Hub') {
             steps {
-                echo 'Verify Running Container'
-                sh '/usr/local/bin/docker ps'
+
+                sh '${DOCKER} push ${DOCKER_HUB_USER}/court-frontend:v1'
+
+                sh '${DOCKER} push ${DOCKER_HUB_USER}/court-backend:v1'
+            }
+        }
+
+        stage('Deploy Using Docker Compose') {
+            steps {
+
+                sh '${DOCKER} compose down'
+
+                sh '${DOCKER} compose up -d --build'
+            }
+        }
+
+        stage('Verify Containers') {
+            steps {
+
+                sh '${DOCKER} compose ps'
             }
         }
     }
